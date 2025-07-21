@@ -1,2 +1,2 @@
-# loja_micro_service
-projeto de Tópicos de Engenharia Química (Monolíto -> Microsserviços)
+# Restaurante
+Pequeno sistema de Restaurante em python, usando apenas manipulação de arquivos.

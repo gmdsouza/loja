@@ -1,0 +1,21 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "title": "Bife",
+      "price": 20,
+      "description": "Bife com arroz",
+      "category": "prato"
+    },
+    {
+      "id": 2,
+      "title": "Suco de laranja",
+      "price": 5,
+      "description": "Suco natural",
+      "category": "bebida"
+    }
+  ],
+  "orders": [],
+  "reservas": [],
+  "promocoes": []
+}
