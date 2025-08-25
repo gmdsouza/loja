@@ -1,9 +1,11 @@
 import menu_principal
 import manipulacaoArquivos
 import atexit
+from auth_loja import iniciar_sistema  # novo import
 
 # Limpeza automática ao sair do programa
 atexit.register(manipulacaoArquivos.apagarArquivosTemporarios)
 
 if __name__ == "__main__":
-    menu_principal.exibir_menu_principal()
+    iniciar_sistema()  # inicia com login/cadastro/esqueci senha
+
