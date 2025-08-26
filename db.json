@@ -17,5 +17,24 @@
   ],
   "orders": [],
   "reservas": [],
-  "promocoes": []
+  "promocoes": [],
+  "usuarios": [
+    {
+      "id": "b6e4e7dd41481b4b",
+      "username": "teste",
+      "nome": "teste",
+      "email": "teste@gmail.com",
+      "senha_hash": "ca9675e97c3abe4690d353b658e3fafd1545f47758bad8985eb36c1dfb6b559a",
+      "senha_salt": "005ed919a5a2f8a39910f5ce559e7bd6",
+      "pergunta": "teste",
+      "resposta_hash": "44f81272e5cafdd2aa6d31732c57dc22fb13d3ddf843660e6bee6ff049cc62f2",
+      "resposta_salt": "9660cfcde6d95c29f26cb9c9bfc62188",
+      "criado_em": 1756246485,
+      "ativo": true,
+      "roles": [
+        "cliente"
+      ]
+    }
+  ],
+  "recuperacoes": {}
 }

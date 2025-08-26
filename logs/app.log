@@ -1,0 +1,15 @@
+2025-08-26 14:27:21,714 [INFO] auth: Aplicação iniciada
+2025-08-26 14:27:41,924 [INFO] auth: Falha de login para 'admin': Usuário não encontrado.
+2025-08-26 19:11:19,289 [INFO] auth: Aplicação iniciada
+2025-08-26 19:14:15,752 [INFO] auth: Aplicação iniciada
+2025-08-26 19:14:21,663 [INFO] auth: Aplicação iniciada
+2025-08-26 19:14:45,717 [INFO] auth: Usuário criado: teste
+2025-08-26 19:14:57,287 [INFO] auth: Login bem-sucedido para 'teste'
+2025-08-26 19:20:32,687 [INFO] auth: Aplicação iniciada
+2025-08-26 19:21:24,012 [INFO] auth: Login bem-sucedido para 'teste'
+2025-08-26 19:26:17,663 [INFO] auth: Aplicação iniciada
+2025-08-26 19:26:26,567 [INFO] auth: Login bem-sucedido para 'teste'
+2025-08-26 19:26:34,003 [INFO] auth: Aplicação iniciada
+2025-08-26 19:26:52,533 [INFO] auth: Senha redefinida para login 'teste'
+2025-08-26 19:28:38,876 [INFO] auth: Aplicação iniciada
+2025-08-26 19:28:44,138 [INFO] auth: Login bem-sucedido para 'teste'

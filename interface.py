@@ -2,6 +2,8 @@ import os
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from rich.align import Align
+from typing import Optional
 
 console = Console()
 
@@ -17,6 +19,23 @@ def titulo(texto):
         subtitle="Tópicos de Eng. de Software"
     )
     console.print(panel)
+
+def cabecalho(titulo_texto: str) -> None:
+    limpar_tela()
+    titulo(titulo_texto)
+
+def painel(texto: str, titulo_painel: Optional[str] = None, estilo: str = "cyan") -> None:
+    try:
+        console.print(
+            Panel(
+                Align.center(texto, vertical="middle"),
+                title=titulo_painel,
+                border_style=estilo,
+                padding=(1, 2),
+            )
+        )
+    except Exception:
+        print(f"[{titulo_painel}] {texto}")
 
 def mostrar_menu(opcoes, titulo_menu="MENU"):
     limpar_tela()
@@ -52,6 +71,21 @@ def mensagem_alerta(texto):
 
 def mensagem_sucesso(texto):
     console.print(f"[bold green]{texto}[/bold green]")
+
+def prompt(label: str, padrao: Optional[str] = None) -> str:
+    if padrao is not None:
+        return console.input(f"{label} [dim][{padrao}]: [/dim]") or padrao
+    return console.input(f"{label}: ")
+
+def prompt_senha(label: str) -> str:
+    return console.input(f"{label}: ", password=True)
+
+def confirmar(label: str, default: bool = True) -> bool:
+    sufixo = "[S/n]" if default else "[s/N]"
+    resp = console.input(f"{label} {sufixo}: ").strip().lower()
+    if not resp:
+        return default
+    return resp in ("s", "sim", "y", "yes")
 
 def pausar():
     console.print("\n[dim]Pressione [bold]Enter[/bold] para continuar...[/dim]")
