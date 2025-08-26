@@ -29,7 +29,21 @@ def realizar_pagamento():
                 interface.mensagem_alerta(f"Erro ao processar linha: {linha} → {e}")
 
         print(f"\n🧾 Valor total dos pedidos: R$ {soma:.2f}")
-        metodo = input("💰 Forma de pagamento (crédito/débito/dinheiro): ")
+        print("\nSelecione a forma de pagamento:")
+        print("1 - Crédito")
+        print("2 - Débito")
+        print("3 - Dinheiro")
+
+        opcao = input("\nDigite o número da opção: ").strip()
+
+        metodos = {"1": "crédito", "2": "débito", "3": "dinheiro"}
+
+        if opcao not in metodos:
+            interface.mensagem_alerta("❌ Opção inválida. Pressione ENTER para voltar ao menu.")
+            input()
+            return
+
+        metodo = metodos[opcao]
         interface.mensagem_sucesso(f"✅ Pagamento de R$ {soma:.2f} realizado via {metodo.upper()}!")
 
         with open("Pedidos.txt", "w") as f:
@@ -38,4 +52,5 @@ def realizar_pagamento():
         interface.mensagem_sucesso("🧾 Pedidos quitados e arquivo zerado.")
     except FileNotFoundError:
         interface.mensagem_alerta("❌ Arquivo de pedidos não encontrado.")
+
     interface.pausar()
