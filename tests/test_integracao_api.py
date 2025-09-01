@@ -1,8 +1,9 @@
 import pytest
+import os 
 from src.interface import interface
 from src.services.catalogo import buscar_produtos_api
 
-@pytest.mark.integracao
+@pytest.mark.skipif(os.getenv('CI') == 'true', reason="Skip in CI environment")
 def test_buscar_produtos_api():
     """
     Este teste faz uma chamada REAL para a Fake Store API.
