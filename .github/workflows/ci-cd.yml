@@ -96,13 +96,11 @@ jobs:
           echo "Renamed .coverage to .coverage.${{ matrix.test-type }}"
         else
           echo "No .coverage file found for ${{ matrix.test-type }}, creating empty one"
-          python -c "
-          import coverage
-          cov = coverage.Coverage()
-          cov.start()
-          cov.stop()
-          cov.save()
-          "
+          python -c "import coverage
+cov = coverage.Coverage()
+cov.start()
+cov.stop()
+cov.save()"
           mv .coverage .coverage.${{ matrix.test-type }}
         fi
 
@@ -150,13 +148,11 @@ jobs:
           echo "Renamed .coverage to .coverage.integration"
         else
           echo "No .coverage file found, creating empty one"
-          python -c "
-          import coverage
-          cov = coverage.Coverage()
-          cov.start()
-          cov.stop()
-          cov.save()
-          "
+          python -c "import coverage
+cov = coverage.Coverage()
+cov.start()
+cov.stop()
+cov.save()"
           mv .coverage .coverage.integration
         fi
 
@@ -204,13 +200,11 @@ jobs:
           echo "Renamed .coverage to .coverage.all"
         else
           echo "No .coverage file found, creating empty one"
-          python -c "
-          import coverage
-          cov = coverage.Coverage()
-          cov.start()
-          cov.stop()
-          cov.save()
-          "
+          python -c "import coverage
+cov = coverage.Coverage()
+cov.start()
+cov.stop()
+cov.save()"
           mv .coverage .coverage.all
         fi
 
@@ -274,16 +268,13 @@ jobs:
         # If no files found, create a minimal one to avoid errors
         if [ -z "$(ls -A all-coverage-databases/ 2>/dev/null)" ]; then
           echo "No coverage files found, creating minimal coverage database"
-          python -c "
-          import coverage
-          cov = coverage.Coverage()
-          cov.start()
-          # Create some coverage data
-          x = 'test'
-          y = len(x)
-          cov.stop()
-          cov.save()
-          "
+          python -c "import coverage
+cov = coverage.Coverage()
+cov.start()
+x = 'test'
+y = len(x)
+cov.stop()
+cov.save()"
           cp .coverage all-coverage-databases/coverage.minimal
         fi
         
@@ -314,15 +305,12 @@ jobs:
           python -m coverage combine .coverage*
         else
           echo "No coverage files found, creating new coverage..."
-          python -c "
-          import coverage
-          cov = coverage.Coverage()
-          cov.start()
-          # Minimal coverage data
-          result = 1 + 1
-          cov.stop()
-          cov.save()
-          "
+          python -c "import coverage
+cov = coverage.Coverage()
+cov.start()
+result = 1 + 1
+cov.stop()
+cov.save()"
         fi
         
         # Generate reports
@@ -380,14 +368,12 @@ jobs:
           ls -la combined-coverage.xml
         else
           echo "⚠ Combined coverage file not found, creating minimal one"
-          python -c "
-          import coverage
-          cov = coverage.Coverage()
-          cov.start()
-          x = 'sonarqube'
-          cov.stop()
-          cov.xml_report(outfile='combined-coverage.xml')
-          "
+          python -c "import coverage
+cov = coverage.Coverage()
+cov.start()
+x = 'sonarqube'
+cov.stop()
+cov.xml_report(outfile='combined-coverage.xml')"
         fi
 
     - name: SonarQube Scan
