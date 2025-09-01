@@ -1,6 +1,6 @@
-import manipulacaoArquivos
+import src.utils.manipulacaoArquivos as manipulacaoArquivos
 import json
-import interface
+import src.interface.interface as interface
 
 def realizar_pagamento():
     interface.limpar_tela()

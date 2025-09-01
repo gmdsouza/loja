@@ -1,8 +1,8 @@
 from datetime import datetime
-import manipulacaoArquivos
+import src.utils.manipulacaoArquivos as manipulacaoArquivos
 import requests
 import json
-import interface
+import src.interface.interface as interface
 
 listaPedido = []
 

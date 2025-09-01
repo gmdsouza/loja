@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from typing import Optional, Dict, Any
-from interface import pausar, mensagem_alerta, mensagem_sucesso, cabecalho, mostrar_menu, prompt, prompt_senha, confirmar, painel
-from usuarios import criar_usuario, validar_login, iniciar_recuperacao, concluir_recuperacao
-from logs import get_logger
+from src.interface.interface import pausar, mensagem_alerta, mensagem_sucesso, cabecalho, mostrar_menu, prompt, prompt_senha, confirmar, painel
+from src.auth.usuarios import criar_usuario, validar_login, iniciar_recuperacao, concluir_recuperacao
+from src.utils.logs import get_logger
 
 log = get_logger("auth")
 

@@ -1,19 +1,16 @@
 import pytest
-import pedidos
-import manipulacaoArquivos
-import interface
+from src.pedidos import pedidos
+from src.utils import manipulacaoArquivos
+from src.interface import interface
 from unittest.mock import ANY
 from datetime import datetime
 
 @pytest.mark.unitario_pedidos_adicionar
 def test_adicionar_pedido(mocker):
     """
-
     Testa o cenário de adicionar um pedido.
-
     """
-
-    mocker.patch('pedidos.listaPedido', [])
+    mocker.patch('src.pedidos.pedidos.listaPedido', [])
 
     # 2. Simulamos a resposta da API e dos ficheiros locais
     produtos_api_falsos = [
@@ -26,19 +23,19 @@ def test_adicionar_pedido(mocker):
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = produtos_api_falsos
-    mocker.patch('pedidos.requests.get', return_value=mock_response)
+    mocker.patch('src.pedidos.pedidos.requests.get', return_value=mock_response)
     
     # Mock para a leitura de ficheiro local
-    mocker.patch('manipulacaoArquivos.lerProdutosLocais', return_value=produtos_locais_falsos)
+    mocker.patch('src.utils.manipulacaoArquivos.lerProdutosLocais', return_value=produtos_locais_falsos)
 
     # 3. Simulamos o input do utilizador a escolher o produto com ID 2
     mocker.patch('builtins.input', side_effect=['2'])
 
     # 4. Mocks para as funções de interface
-    mocker.patch('interface.limpar_tela')
-    mocker.patch('interface.mostrar_tabela_produtos')
-    mock_mensagem_sucesso = mocker.patch('interface.mensagem_sucesso')
-    mocker.patch('interface.pausar')
+    mocker.patch('src.interface.interface.limpar_tela')
+    mocker.patch('src.interface.interface.mostrar_tabela_produtos')
+    mock_mensagem_sucesso = mocker.patch('src.interface.interface.mensagem_sucesso')
+    mocker.patch('src.interface.interface.pausar')
 
     # --- ACT ---
     pedidos.adicionar_pedido()
@@ -55,7 +52,6 @@ def test_adicionar_pedido(mocker):
 def test_fechar_pedido(mocker):
     """
     Testa o cenário de fechar um pedido.
-
     """
     # --- ARRANGE (Preparar o Cenário) ---
 
@@ -65,23 +61,23 @@ def test_fechar_pedido(mocker):
         (2, 'Produto B', 20.50)
     ]
     # Forçar a variável global a ter este valor no início do teste.
-    mocker.patch('pedidos.listaPedido', pedido_falso_em_andamento)
+    mocker.patch('src.pedidos.pedidos.listaPedido', pedido_falso_em_andamento)
 
     # 2. Simular o input do utilizador para o nome e CPF.
     mocker.patch('builtins.input', side_effect=['Cliente Teste', '123.456.789-00'])
 
     # 3. Mockar a data e hora.
     timestamp_falso = datetime(2025, 8, 19, 17, 30, 0) 
-    mock_datetime = mocker.patch('pedidos.datetime') 
+    mock_datetime = mocker.patch('src.pedidos.pedidos.datetime') 
     mock_datetime.now.return_value = timestamp_falso 
 
     # 4. Preparamos o nosso espião para a função que grava no ficheiro.
-    mock_gravar = mocker.patch('manipulacaoArquivos.gravarPedidos')
+    mock_gravar = mocker.patch('src.utils.manipulacaoArquivos.gravarPedidos')
 
     # 5. Mocks para as funções de interface.
-    mocker.patch('interface.limpar_tela')
-    mocker.patch('interface.mensagem_sucesso')
-    mocker.patch('interface.pausar')
+    mocker.patch('src.interface.interface.limpar_tela')
+    mocker.patch('src.interface.interface.mensagem_sucesso')
+    mocker.patch('src.interface.interface.pausar')
 
     # --- ACT (Executar a Ação) ---
     pedidos.fechar_pedido()
@@ -99,11 +95,8 @@ def test_fechar_pedido(mocker):
 @pytest.mark.unitario_pedidos_remover_item
 def test_remover_item_pedido(mocker):
     """
-
     Testa o cenário de remover um item do pedido.
-
     """
-
     # --- ARRANGE (Preparar o Cenário) ---
 
     # 1. Preparamos uma lista de pedidos com dois itens.
@@ -111,21 +104,19 @@ def test_remover_item_pedido(mocker):
         (1, 'Produto A', 10.0),
         (2, 'Produto B', 20.0)  # <-- Este será removido
     ]
-    mocker.patch('pedidos.listaPedido', pedido_falso_com_dois_itens)
+    mocker.patch('src.pedidos.pedidos.listaPedido', pedido_falso_com_dois_itens)
 
     # 2. Simula o input do utilizador.
     mocker.patch('builtins.input', return_value='2')
 
     # 3. Mocks para as funções de interface.
-    mocker.patch('interface.limpar_tela')
-    mocker.patch('interface.mostrar_tabela_pedidos')
-    mock_mensagem_sucesso = mocker.patch('interface.mensagem_sucesso')
-    mocker.patch('interface.pausar')
-
+    mocker.patch('src.interface.interface.limpar_tela')
+    mocker.patch('src.interface.interface.mostrar_tabela_pedidos')
+    mock_mensagem_sucesso = mocker.patch('src.interface.interface.mensagem_sucesso')
+    mocker.patch('src.interface.interface.pausar')
 
     # --- ACT (Executar a Ação) ---
     pedidos.remover_item_pedido()
-
 
     # --- ASSERT (Verificar os Resultados) ---
 
@@ -143,26 +134,23 @@ def test_remover_item_pedido(mocker):
 @pytest.mark.unitario_pedidos_listar
 def test_listar_pedido(mocker):
     """
-
     Testa o cenário de listar o pedido.
-
     """
-
     # --- ARRANGE ---
     # 1. Preparar uma lista de pedidos com alguns itens.
     pedido_falso = [
         (1, 'Produto A', 10.0),
         (2, 'Produto B', 20.0)
     ]
-    mocker.patch('pedidos.listaPedido', pedido_falso)
+    mocker.patch('src.pedidos.pedidos.listaPedido', pedido_falso)
 
     # 2. Preparar as duas funções de interface que podem ser chamadas.
     mock_mostrar_tabela = mocker.spy(interface, 'mostrar_tabela_pedidos')
-    mock_mensagem_alerta = mocker.patch('interface.mensagem_alerta')
+    mock_mensagem_alerta = mocker.patch('src.interface.interface.mensagem_alerta')
 
     # Mock para a função de pausa no final.
-    mocker.patch('interface.pausar')
-    mocker.patch('interface.limpar_tela')
+    mocker.patch('src.interface.interface.pausar')
+    mocker.patch('src.interface.interface.limpar_tela')
 
     # --- ACT ---
     pedidos.listar_pedidos()

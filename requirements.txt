@@ -1,4 +1,5 @@
 requests>=2.21.0
-rich>=13.7.0
-pytest
-pytest-mock
+pytest==8.4.1
+pytest-mock==3.14.1
+coverage==7.6.7
+rich==13.9.4

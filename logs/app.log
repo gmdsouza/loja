@@ -13,3 +13,62 @@
 2025-08-26 19:26:52,533 [INFO] auth: Senha redefinida para login 'teste'
 2025-08-26 19:28:38,876 [INFO] auth: Aplicação iniciada
 2025-08-26 19:28:44,138 [INFO] auth: Login bem-sucedido para 'teste'
+2025-09-01 14:45:47,183 [INFO] auth: Aplicação iniciada
+2025-09-01 14:45:58,075 [INFO] auth: Login bem-sucedido para 'teste'
+2025-09-01 14:47:29,384 [INFO] auth: Aplicação iniciada
+2025-09-01 14:47:32,876 [INFO] auth: Login bem-sucedido para 'teste'
+2025-09-01 14:48:44,959 [INFO] auth: Aplicação iniciada
+2025-09-01 14:48:48,081 [INFO] auth: Login bem-sucedido para 'teste'
+2025-09-01 15:21:38,170 [INFO] auth: Login bem-sucedido para '1'
+2025-09-01 15:21:40,442 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:41,464 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:41,976 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:42,385 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:42,769 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:43,339 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:43,966 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:44,366 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:44,683 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:44,935 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,093 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,235 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,736 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,768 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,803 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,837 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,855 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,885 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,921 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,954 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:45,992 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:46,005 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 15:21:46,036 [INFO] auth: Falha de login para '1': Senha inválida.
+2025-09-01 16:17:33,918 [INFO] auth: Aplicação iniciada
+2025-09-01 16:17:38,114 [INFO] auth: Login bem-sucedido para 'teste'
+2025-09-01 16:17:46,933 [ERROR] auth: Erro abrindo menu_principal
+Traceback (most recent call last):
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/auth/auth_loja.py", line 23, in _abrir_menu_pos_login
+    fn()  # o menu atual não recebe usuário
+    ^^^^
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/menu_principal.py", line 23, in exibir_menu_principal
+    menu_cadastros()
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/menu_principal.py", line 50, in menu_cadastros
+    cadastros.cadastrar_item()
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/models/cadastros.py", line 15, in cadastrar_item
+    id_fake = gerar_id_produto()
+              ^^^^^^^^^^^^^^^^^^
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/models/cadastros.py", line 25, in gerar_id_produto
+    produtos_locais = manipulacaoArquivos.lerProdutosLocais()
+                      ^^^^^^^^^^^^^^^^^^^
+NameError: name 'manipulacaoArquivos' is not defined
+2025-09-01 16:18:19,293 [INFO] auth: Aplicação iniciada
+2025-09-01 16:18:22,408 [INFO] auth: Login bem-sucedido para 'teste'
+2025-09-01 16:18:57,198 [ERROR] auth: Erro abrindo menu_principal
+Traceback (most recent call last):
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/auth/auth_loja.py", line 23, in _abrir_menu_pos_login
+    fn()  # o menu atual não recebe usuário
+    ^^^^
+  File "/home/rhuan/rhuan/faculdade/TopicosEng/loja/src/menu_principal.py", line 29, in exibir_menu_principal
+    pedidos.menu_pedidos()
+    ^^^^^^^
+NameError: name 'pedidos' is not defined

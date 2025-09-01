@@ -1,6 +1,6 @@
 import pytest
-import interface
-from catalogo import buscar_produtos_api
+from src.interface import interface
+from src.services.catalogo import buscar_produtos_api
 
 @pytest.mark.integracao
 def test_buscar_produtos_api():

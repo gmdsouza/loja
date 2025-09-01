@@ -1,5 +1,5 @@
 import pytest
-from catalogo import buscar_produtos_api
+from src.services.catalogo import buscar_produtos_api
 
 @pytest.mark.unitarios
 def test_buscar_produtos_api_sucesso(mocker):
@@ -15,7 +15,8 @@ def test_buscar_produtos_api_sucesso(mocker):
     mock_response.json.return_value = mock_resposta_api 
     mock_response.raise_for_status.return_value = None 
 
-    mocker.patch('catalogo.requests.get', return_value=mock_response)
+    # CORREÇÃO: caminho completo do módulo
+    mocker.patch('src.services.catalogo.requests.get', return_value=mock_response)
 
     resultado = buscar_produtos_api()
 

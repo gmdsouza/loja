@@ -1,8 +1,11 @@
-import cadastros
-import pagamentos
-import catalogo
-import pedidos
-import interface
+import src.models.cadastros as cadastros
+import src.pagamentos.pagamentos as pagamentos
+import src.services.catalogo as catalogo
+import src.pedidos.pedidos as pedidos
+import src.interface.interface as interface
+import sys
+import os
+sys.path.insert(0, os.path.abspath('.'))
 
 def exibir_menu_principal():
     while True:

@@ -1,7 +1,10 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath('.'))
 import menu_principal
-import manipulacaoArquivos
+import src.utils.manipulacaoArquivos as manipulacaoArquivos
 import atexit
-from auth_loja import iniciar_sistema  # novo import
+from src.auth.auth_loja import iniciar_sistema  # novo import
 
 # Limpeza automática ao sair do programa
 atexit.register(manipulacaoArquivos.apagarArquivosTemporarios)

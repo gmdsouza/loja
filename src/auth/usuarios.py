@@ -7,7 +7,7 @@ import secrets
 import time
 from typing import Dict, Any, Optional, Tuple, List
 
-from auth_manipulacao import carregar_db, salvar_db
+from .auth_manipulacao import carregar_db, salvar_db
 
 
 def _hash_texto(texto: str, salt: str) -> str:
