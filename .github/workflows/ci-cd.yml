@@ -83,13 +83,23 @@ jobs:
     - name: Run ${{ matrix.test-type }} tests
       run: |
         echo "Running tests with marker: ${{ matrix.test-type }}"
-        python -m pytest -m "${{ matrix.test-type }}" -v --cov=src --cov-report=xml || echo "No tests found for this marker"
+        # Run tests and generate both XML report and coverage database
+        python -m pytest -m "${{ matrix.test-type }}" -v --cov=src --cov-report=xml --cov-report=html || echo "No tests found for this marker"
 
-    - name: Upload coverage report
+    - name: Rename coverage database
+      run: |
+        # Rename the .coverage file to avoid conflicts when combining
+        if [ -f .coverage ]; then
+          mv .coverage .coverage.${{ matrix.test-type }}
+        fi
+
+    - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
         name: coverage-${{ matrix.test-type }}
-        path: coverage.xml
+        path: |
+          coverage.xml
+          .coverage.${{ matrix.test-type }}
       if: always()
 
   integration-tests:
@@ -115,13 +125,21 @@ jobs:
 
     - name: Run integration tests
       run: |
-        python -m pytest -m "integracao" -v --cov=src --cov-report=xml || echo "No integration tests found"
+        python -m pytest -m "integracao" -v --cov=src --cov-report=xml --cov-report=html || echo "No integration tests found"
+
+    - name: Rename coverage database
+      run: |
+        if [ -f .coverage ]; then
+          mv .coverage .coverage.integration
+        fi
 
     - name: Upload integration coverage
       uses: actions/upload-artifact@v4
       with:
         name: coverage-integration
-        path: coverage.xml
+        path: |
+          coverage.xml
+          .coverage.integration
       if: always()
 
   all-tests:
@@ -147,7 +165,13 @@ jobs:
 
     - name: Run all tests
       run: |
-        python -m pytest -v --cov=src --cov-report=xml --junitxml=test-results.xml
+        python -m pytest -v --cov=src --cov-report=xml --cov-report=html --junitxml=test-results.xml
+
+    - name: Rename coverage database
+      run: |
+        if [ -f .coverage ]; then
+          mv .coverage .coverage.all
+        fi
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -159,7 +183,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-all
-        path: coverage.xml
+        path: |
+          coverage.xml
+          .coverage.all
 
   combine-coverage:
     name: Combine Coverage
@@ -185,17 +211,43 @@ jobs:
       with:
         path: coverage-reports
 
-    - name: Combine coverage
+    - name: List downloaded files
       run: |
-        python -m coverage combine coverage-reports/coverage-*/coverage.xml coverage-reports/coverage-all/coverage.xml
+        find coverage-reports -type f -name "*.coverage.*" | head -20
+        echo "Total coverage database files found:"
+        find coverage-reports -type f -name "*.coverage.*" | wc -l
+
+    - name: Combine coverage databases
+      run: |
+        # Copy all .coverage files to current directory
+        find coverage-reports -name ".coverage.*" -exec cp {} . \;
+        
+        # List the files we found
+        echo "Coverage files to combine:"
+        ls -la .coverage.* 2>/dev/null || echo "No .coverage.* files found"
+        
+        # Combine coverage databases
+        if ls .coverage.* 1> /dev/null 2>&1; then
+          python -m coverage combine .coverage.*
+          echo "Coverage combined successfully"
+        else
+          echo "No coverage files found to combine"
+          exit 1
+        fi
+        
+        # Generate combined reports
         python -m coverage xml -o combined-coverage.xml
+        python -m coverage html -d coverage-html
         python -m coverage report
 
     - name: Upload combined coverage
       uses: actions/upload-artifact@v4
       with:
         name: combined-coverage
-        path: combined-coverage.xml
+        path: |
+          combined-coverage.xml
+          .coverage
+          coverage-html/
 
   sonarqube:
     name: SonarQube Analysis
