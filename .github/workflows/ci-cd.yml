@@ -12,47 +12,10 @@ permissions:
   contents: read
 
 jobs:
-  unit-tests:
-    name: Unit Tests
+  install-dependencies:
+    name: Install Dependencies
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.12']
-        test-type: ['login', 'cadastro', 'exclusao', 'editar', 'pagamento', 'pedidos']
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-mock coverage
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Run ${{ matrix.test-type }} unit tests
-      run: |
-        python -m pytest -m "unitarios_${{ matrix.test-type }}" -v --cov=. --cov-append --cov-report=xml
-
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-${{ matrix.test-type }}
-        path: coverage.xml
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: unit-tests
-    if: always()
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -62,26 +25,77 @@ jobs:
       with:
         python-version: '3.12'
 
+    - name: Install core dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install rich requests pytest pytest-cov pytest-mock
+
+    - name: Install from requirements.txt if exists
+      run: |
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Verify installations
+      run: |
+        python -c "import rich; print('✓ rich installed')"
+        python -c "import requests; print('✓ requests installed')"
+        python -c "import pytest; print('✓ pytest installed')"
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    strategy:
+      matrix:
+        test-type: [
+          'unitarios_login', 
+          'unitarios_cadastro', 
+          'unitarios_exclusao', 
+          'unitarios_editar',
+          'unitario_pagamento',
+          'unitario_pedidos_adicionar',
+          'unitario_pedidos_fechar',
+          'unitario_pedidos_remover_item',
+          'unitario_pedidos_listar',
+          'unitario_catalogo',
+          'unitario_usuarios',
+          'unitario_auth_manipulacao',
+          'unitario_auth_loja',
+          'unitario_arquivos',
+          'unitario_menu',
+          'unitario_loja'
+        ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-mock coverage
+        pip install rich requests pytest pytest-cov pytest-mock
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Run integration tests
+    - name: Run ${{ matrix.test-type }} tests
       run: |
-        python -m pytest -m integracao -v --cov=. --cov-append --cov-report=xml
+        echo "Running tests with marker: ${{ matrix.test-type }}"
+        python -m pytest -m "${{ matrix.test-type }}" -v --cov=src --cov-report=xml || echo "No tests found for this marker"
 
-    - name: Upload integration coverage
+    - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-integration
+        name: coverage-${{ matrix.test-type }}
         path: coverage.xml
+      if: always()
 
-  combine-coverage:
-    name: Combine Coverage Reports
+  integration-tests:
+    name: Integration Tests
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]
+    needs: install-dependencies
     if: always()
 
     steps:
@@ -96,17 +110,86 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install rich requests pytest pytest-cov pytest-mock
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run integration tests
+      run: |
+        python -m pytest -m "integracao" -v --cov=src --cov-report=xml || echo "No integration tests found"
+
+    - name: Upload integration coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-integration
+        path: coverage.xml
+      if: always()
+
+  all-tests:
+    name: Run All Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    if: always()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install rich requests pytest pytest-cov pytest-mock
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run all tests
+      run: |
+        python -m pytest -v --cov=src --cov-report=xml --junitxml=test-results.xml
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: test-results.xml
+
+    - name: Upload coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-all
+        path: coverage.xml
+
+  combine-coverage:
+    name: Combine Coverage
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, all-tests]
+    if: always()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install coverage
+      run: |
         pip install coverage
 
-    - name: Download all coverage reports
+    - name: Download coverage reports
       uses: actions/download-artifact@v4
       with:
         path: coverage-reports
 
-    - name: Combine coverage reports
+    - name: Combine coverage
       run: |
-        python -m coverage combine coverage-reports/coverage-*/coverage.xml
+        python -m coverage combine coverage-reports/coverage-*/coverage.xml coverage-reports/coverage-all/coverage.xml
         python -m coverage xml -o combined-coverage.xml
+        python -m coverage report
 
     - name: Upload combined coverage
       uses: actions/upload-artifact@v4
@@ -114,7 +197,7 @@ jobs:
         name: combined-coverage
         path: combined-coverage.xml
 
-  sonarqube-analysis:
+  sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
     needs: combine-coverage
@@ -126,67 +209,41 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Download combined coverage
-      uses: actions/download-artifact@v4
-      with:
-        name: combined-coverage
-
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
+    - name: Download combined coverage
+      uses: actions/download-artifact@v4
+      with:
+        name: combined-coverage
+        path: .
 
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v4
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       with:
         args: >
-          -Dsonar.projectKey=loja-microsservicos
-          -Dsonar.projectName=Loja em Microsserviços
-          -Dsonar.python.version=3.12
+          -Dsonar.projectKey=loja
+          -Dsonar.projectName=Loja
           -Dsonar.python.coverage.reportPaths=combined-coverage.xml
-          -Dsonar.sources=.
-          -Dsonar.exclusions=**/test_*,**/venv/**,**/.github/**,**/__pycache__/**,**/.git/**
-          -Dsonar.tests=.
-          -Dsonar.test.inclusions=**/test_*.py
+          -Dsonar.sources=src
+          -Dsonar.tests=tests
           -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.junit.reportPaths=test-results.xml
-          -Dsonar.python.xunit.reportPath=test-results.xml
 
-  test-summary:
-    name: Test Summary
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]
-    if: always()
+    needs: [all-tests, sonarqube]
+    if: success() && github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
+    - name: Deploy success message
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-
-    - name: Run all tests for summary
-      run: |
-        python -m pytest --junitxml=test-results.xml -v
-
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        files: test-results.xml
+        echo "✅ All tests passed! Ready for deployment."
