@@ -72,3 +72,4 @@ Traceback (most recent call last):
     pedidos.menu_pedidos()
     ^^^^^^^
 NameError: name 'pedidos' is not defined
+2025-09-01 18:27:35,995 [INFO] auth: Falha de login para '': Usuário não encontrado.

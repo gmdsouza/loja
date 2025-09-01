@@ -1,4 +1,5 @@
 import os
+import rich
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
