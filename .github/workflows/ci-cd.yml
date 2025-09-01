@@ -96,11 +96,7 @@ jobs:
           echo "Renamed .coverage to .coverage.${{ matrix.test-type }}"
         else
           echo "No .coverage file found for ${{ matrix.test-type }}, creating empty one"
-          python -c "import coverage
-cov = coverage.Coverage()
-cov.start()
-cov.stop()
-cov.save()"
+          python -c "import coverage; cov = coverage.Coverage(); cov.start(); cov.stop(); cov.save()"
           mv .coverage .coverage.${{ matrix.test-type }}
         fi
 
@@ -148,11 +144,7 @@ cov.save()"
           echo "Renamed .coverage to .coverage.integration"
         else
           echo "No .coverage file found, creating empty one"
-          python -c "import coverage
-cov = coverage.Coverage()
-cov.start()
-cov.stop()
-cov.save()"
+          python -c "import coverage; cov = coverage.Coverage(); cov.start(); cov.stop(); cov.save()"
           mv .coverage .coverage.integration
         fi
 
@@ -200,11 +192,7 @@ cov.save()"
           echo "Renamed .coverage to .coverage.all"
         else
           echo "No .coverage file found, creating empty one"
-          python -c "import coverage
-cov = coverage.Coverage()
-cov.start()
-cov.stop()
-cov.save()"
+          python -c "import coverage; cov = coverage.Coverage(); cov.start(); cov.stop(); cov.save()"
           mv .coverage .coverage.all
         fi
 
@@ -251,66 +239,53 @@ cov.save()"
       with:
         path: coverage-reports
 
-    - name: Find and collect all coverage files
+    - name: Debug - List all downloaded files
       run: |
-        echo "=== Searching for coverage files ==="
+        echo "=== Full directory structure ==="
+        find coverage-reports -type f -name "*" | head -20
+        echo "=== Artifact directories ==="
+        ls -la coverage-reports/
+
+    - name: Extract coverage files from all subdirectories
+      run: |
+        echo "=== Extracting coverage files ==="
         
-        # Create directory for all coverage files
-        mkdir -p all-coverage-databases
+        # Create directory for collected coverage files
+        mkdir -p collected-coverage
         
-        # Find all .coverage files in the downloaded artifacts
-        find coverage-reports -name ".coverage*" -exec cp {} all-coverage-databases/ \; 2>/dev/null || true
+        # Find and copy ALL files from all subdirectories
+        find coverage-reports -type f \( -name ".coverage*" -o -name "coverage.xml" \) -exec cp {} collected-coverage/ \;
         
         # List what we found
-        echo "Found coverage files:"
-        ls -la all-coverage-databases/ || echo "No coverage files found yet"
+        echo "Files collected:"
+        ls -la collected-coverage/ || echo "No files collected"
         
-        # If no files found, create a minimal one to avoid errors
-        if [ -z "$(ls -A all-coverage-databases/ 2>/dev/null)" ]; then
-          echo "No coverage files found, creating minimal coverage database"
-          python -c "import coverage
-cov = coverage.Coverage()
-cov.start()
-x = 'test'
-y = len(x)
-cov.stop()
-cov.save()"
-          cp .coverage all-coverage-databases/coverage.minimal
+        # If no coverage database files found, create a minimal one
+        if ! ls collected-coverage/.coverage* 1> /dev/null 2>&1; then
+          echo "No coverage database files found, creating minimal one"
+          python -c "import coverage; cov = coverage.Coverage(); cov.start(); x = 'test'; y = len(x); cov.stop(); cov.save()"
+          cp .coverage collected-coverage/coverage.minimal
         fi
-        
-        # Copy all files to current directory with unique names
-        count=1
-        for file in all-coverage-databases/.coverage*; do
-          if [ -f "$file" ]; then
-            new_name="coverage_db_${count}"
-            cp "$file" "$new_name"
-            echo "Copied: $file -> $new_name"
-            count=$((count + 1))
-          fi
-        done
-        
-        echo "Final files to combine:"
-        ls -la coverage_db_* 2>/dev/null || ls -la
 
     - name: Combine coverage databases
       run: |
         echo "=== Combining coverage ==="
         
-        # Try to combine any coverage files found
-        if ls coverage_db_* 1> /dev/null 2>&1; then
-          echo "Combining coverage database files..."
-          python -m coverage combine coverage_db_*
-        elif ls .coverage* 1> /dev/null 2>&1; then
-          echo "Combining .coverage files..."
+        # Copy all coverage files to current directory
+        cp collected-coverage/.coverage* . 2>/dev/null || true
+        
+        # List files available for combining
+        echo "Files available for combining:"
+        ls -la .coverage* 2>/dev/null || echo "No .coverage files found"
+        
+        # Combine coverage files
+        if ls .coverage* 1> /dev/null 2>&1; then
+          echo "Combining coverage files..."
           python -m coverage combine .coverage*
+          echo "✓ Coverage combined successfully"
         else
-          echo "No coverage files found, creating new coverage..."
-          python -c "import coverage
-cov = coverage.Coverage()
-cov.start()
-result = 1 + 1
-cov.stop()
-cov.save()"
+          echo "No coverage files to combine, creating new coverage..."
+          python -c "import coverage; cov = coverage.Coverage(); cov.start(); result = 1 + 1; cov.stop(); cov.save()"
         fi
         
         # Generate reports
@@ -368,12 +343,7 @@ cov.save()"
           ls -la combined-coverage.xml
         else
           echo "⚠ Combined coverage file not found, creating minimal one"
-          python -c "import coverage
-cov = coverage.Coverage()
-cov.start()
-x = 'sonarqube'
-cov.stop()
-cov.xml_report(outfile='combined-coverage.xml')"
+          python -c "import coverage; cov = coverage.Coverage(); cov.start(); x = 'sonarqube'; cov.stop(); cov.xml_report(outfile='combined-coverage.xml')"
         fi
 
     - name: SonarQube Scan
