@@ -5,192 +5,63 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  workflow_dispatch:
-
-permissions:
-  pull-requests: read
-  contents: read
 
 jobs:
-  unit-tests:
-    name: Unit Tests
+  test:
+    name: Run All Tests
     runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        pip install pytest pytest-cov pytest-mock
+
+    - name: Run all tests
+      run: |
+        python -m pytest -v --cov=src --cov-report=xml
+
+    - name: Upload coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage
+        path: coverage.xml
+
+  test-categories:
+    name: Test Categories
+    runs-on: ubuntu-latest
+    needs: test
     strategy:
       matrix:
-        python-version: ['3.12']
-        test-type: ['login', 'cadastro', 'exclusao', 'editar', 'pagamento', 'pedidos']
+        category: ['login', 'cadastros', 'pagamentos', 'pedidos', 'catalogo']
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-mock coverage
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pytest pytest-cov pytest-mock
 
-    - name: Run ${{ matrix.test-type }} unit tests
+    - name: Run ${{ matrix.category }} tests
       run: |
-        # CORREÇÃO: Usar --cov=src em vez de --cov=.
-        python -m pytest -m "unitarios_${{ matrix.test-type }}" -v --cov=src --cov-report=xml
+        # Use arquivos específicos em vez de marcas
+        python -m pytest tests/test_${{ matrix.category }}.py -v --cov=src --cov-report=xml
 
-    - name: Upload coverage report
+    - name: Upload ${{ matrix.category }} coverage
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-${{ matrix.test-type }}
+        name: coverage-${{ matrix.category }}
         path: coverage.xml
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: unit-tests
-    if: always()
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-mock coverage
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Run integration tests
-      run: |
-        # CORREÇÃO: Usar --cov=src em vez de --cov=.
-        python -m pytest -m integracao -v --cov=src --cov-report=xml
-
-    - name: Upload integration coverage
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-integration
-        path: coverage.xml
-
-  combine-coverage:
-    name: Combine Coverage Reports
-    runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]
-    if: always()
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install coverage
-
-    - name: Download all coverage reports
-      uses: actions/download-artifact@v4
-      with:
-        path: coverage-reports
-
-    - name: Combine coverage reports
-      run: |
-        # CORREÇÃO: Combinar relatórios corretamente
-        python -m coverage combine coverage-reports/*/coverage.xml
-        python -m coverage xml -o combined-coverage.xml
-
-    - name: Upload combined coverage
-      uses: actions/upload-artifact@v4
-      with:
-        name: combined-coverage
-        path: combined-coverage.xml
-
-  sonarqube-analysis:
-    name: SonarQube Analysis
-    runs-on: ubuntu-latest
-    needs: combine-coverage
-    if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Download combined coverage
-      uses: actions/download-artifact@v4
-      with:
-        name: combined-coverage
-        path: .
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-
-    - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v4
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      with:
-        args: >
-          -Dsonar.projectKey=loja-microsservicos
-          -Dsonar.projectName=Loja em Microsserviços
-          -Dsonar.python.version=3.12
-          -Dsonar.python.coverage.reportPaths=combined-coverage.xml
-          -Dsonar.sources=src
-          -Dsonar.exclusions=**/test_*,**/venv/**,**/.github/**,**/__pycache__/**,**/.git/**
-          -Dsonar.tests=tests
-          -Dsonar.test.inclusions=**/test_*.py
-          -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.junit.reportPaths=test-results.xml
-          -Dsonar.python.xunit.reportPath=test-results.xml
-
-  test-summary:
-    name: Test Summary
-    runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]
-    if: always()
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-
-    - name: Run all tests for summary
-      run: |
-        python -m pytest --junitxml=test-results.xml -v
-
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        files: test-results.xml
