@@ -5,11 +5,6 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  workflow_dispatch:
-
-permissions:
-  pull-requests: read
-  contents: read
 
 jobs:
   install-dependencies:
@@ -31,38 +26,13 @@ jobs:
         if [ -f requirements.txt ]; then
           pip install -r requirements.txt
         else
-          pip install rich requests pytest pytest-mock
+          pip install pytest
         fi
-
-    - name: Verify installations
-      run: |
-        python -c "import pytest; print('✓ pytest installed')"
-        python -c "import requests; print('✓ requests installed')"
 
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
     needs: install-dependencies
-    strategy:
-      matrix:
-        test-type: [
-          'unitarios_login', 
-          'unitarios_cadastro', 
-          'unitarios_exclusao', 
-          'unitarios_editar',
-          'unitario_pagamento',
-          'unitario_pedidos_adicionar',
-          'unitario_pedidos_fechar',
-          'unitario_pedidos_remover_item',
-          'unitario_pedidos_listar',
-          'unitario_catalogo',
-          'unitario_usuarios',
-          'unitario_auth_manipulacao',
-          'unitario_auth_loja',
-          'unitario_arquivos',
-          'unitario_menu',
-          'unitario_loja'
-        ]
 
     steps:
     - name: Checkout code
@@ -79,168 +49,23 @@ jobs:
         if [ -f requirements.txt ]; then
           pip install -r requirements.txt
         else
-          pip install rich requests pytest pytest-mock
+          pip install pytest
         fi
 
-    - name: Run ${{ matrix.test-type }} tests
+    - name: Run all unit tests
       run: |
-        echo "Running tests with marker: ${{ matrix.test-type }}"
-        python -m pytest -m "${{ matrix.test-type }}" -v --junitxml=test-results-${{ matrix.test-type }}.xml || echo "No tests found for this marker"
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-${{ matrix.test-type }}
-        path: test-results-${{ matrix.test-type }}.xml
-      if: always()
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: install-dependencies
-    if: always()
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        else
-          pip install rich requests pytest pytest-mock
-        fi
-
-    - name: Run integration tests
-      run: |
-        python -m pytest -m "integracao" -v --junitxml=test-results-integration.xml || echo "No integration tests found"
-
-    - name: Upload integration test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-integration
-        path: test-results-integration.xml
-      if: always()
-
-  all-tests:
-    name: Run All Tests
-    runs-on: ubuntu-latest
-    needs: install-dependencies
-    if: always()
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        else
-          pip install rich requests pytest pytest-mock
-        fi
-
-    - name: Run all tests
-      run: |
-        python -m pytest -v --junitxml=test-results-all.xml
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-all
-        path: test-results-all.xml
-
-  sonarqube:
-    name: SonarQube Analysis
-    runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests, all-tests]
-    if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    
-    # Adicione esta condição para pular se não tiver secrets configurados
-    continue-on-error: ${{ !secrets.SONAR_TOKEN || !secrets.SONAR_HOST_URL }}
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        else
-          pip install rich requests
-        fi
-
-    - name: Check if SonarQube secrets are configured
-      run: |
-        if [ -z "${{ secrets.SONAR_TOKEN }}" ] || [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
-          echo "⚠ SonarQube secrets not configured. Skipping analysis."
-          echo "ℹ To enable SonarQube analysis, configure SONAR_TOKEN and SONAR_HOST_URL secrets in GitHub"
-          exit 0
-        else
-          echo "✓ SonarQube secrets configured. Proceeding with analysis."
-        fi
-
-    - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v4
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      with:
-        args: >
-          -Dsonar.projectKey=loja
-          -Dsonar.projectName=Loja
-          -Dsonar.sources=src
-          -Dsonar.tests=tests
-          -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.python.version=3.12
+        python -m pytest -v
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: [all-tests, sonarqube]
+    needs: [unit-tests]
     if: success() && github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        else
-          pip install rich requests
-        fi
-
     - name: Deploy success message
       run: |
         echo "✅ All tests passed! Ready for deployment."
-        echo "🚀 Application can be deployed"
