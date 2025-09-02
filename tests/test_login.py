@@ -73,14 +73,33 @@ def test_esqueci_minha_senha():
 
 @pytest.mark.unitarios_login
 def test_esqueci_senha_usuario_cancela():
-    """Teste quando usuário cancela a recuperação de senha"""
-    
-    with patch('src.auth.auth_loja.prompt', return_value=""):
-        with patch('src.auth.auth_loja.confirmar', return_value=False):
-            with patch('src.auth.auth_loja.mensagem_alerta'):
-                with patch('src.auth.auth_loja.log'):
-                    src.auth.auth_loja.tela_esqueci_senha()
-                    assert True
+    """Deve encerrar imediatamente quando o usuário cancela no prompt"""
+
+    with patch('src.auth.auth_loja.prompt', return_value="") as mock_prompt, \
+         patch('src.auth.auth_loja.confirmar') as mock_confirmar, \
+         patch('src.auth.auth_loja.mensagem_alerta') as mock_alerta, \
+         patch('src.auth.auth_loja.log') as mock_log:
+
+        resultado = src.auth.auth_loja.tela_esqueci_senha()
+
+    # Prompt foi chamado
+    mock_prompt.assert_called_once()
+
+    # Como o usuário cancelou no prompt, não deve chamar confirmar
+    mock_confirmar.assert_not_called()
+
+    # Deve avisar cancelamento ou registrar log
+    assert mock_alerta.called or mock_log.called, \
+        "Cancelamento não foi informado nem registrado."
+
+    if mock_alerta.called:
+        args, _ = mock_alerta.call_args
+        # Basta garantir que uma mensagem não-vazia foi passada
+        assert any(str(a).strip() for a in args), \
+            "mensagem_alerta foi chamada mas sem mensagem significativa."
+
+    # Função deve retornar None (ou algo falsy)
+    assert resultado is None
 
 @pytest.mark.unitarios_login
 def test_cadastro_nova_conta():

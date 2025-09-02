@@ -90,7 +90,7 @@ def test_buscar_usuario_por_login_nao_encontrado(mocker):
 def test_criar_usuario_sucesso(mocker):
     """Testa criação de usuário com sucesso"""
     db_vazio = {"usuarios": []}
-    mock_carregar = mocker.patch('src.auth.usuarios.carregar_db', return_value=db_vazio)
+    mocker.patch('src.auth.usuarios.carregar_db', return_value=db_vazio)
     mock_salvar = mocker.patch('src.auth.usuarios.salvar_db')
     
     resultado, mensagem = usuarios.criar_usuario(
@@ -204,7 +204,7 @@ def test_iniciar_recuperacao_sucesso(mocker):
         "pergunta": "Qual sua cor favorita?"
     }
     
-    mock_carregar = mocker.patch('src.auth.usuarios.carregar_db', return_value={"usuarios": [usuario_fake]})
+    mocker.patch('src.auth.usuarios.carregar_db', return_value={"usuarios": [usuario_fake]})
     mock_salvar = mocker.patch('src.auth.usuarios.salvar_db')
     
     with patch('src.auth.usuarios.buscar_usuario_por_login', return_value=usuario_fake):
@@ -244,7 +244,7 @@ def test_concluir_recuperacao_sucesso(mocker):
         }
     }
     
-    mock_carregar = mocker.patch('src.auth.usuarios.carregar_db', return_value=db_fake)
+    mocker.patch('src.auth.usuarios.carregar_db', return_value=db_fake)
     mock_salvar = mocker.patch('src.auth.usuarios.salvar_db')
     
     resultado, mensagem = usuarios.concluir_recuperacao("token123", "respostacorreta", "novasenha")

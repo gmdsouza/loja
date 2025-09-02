@@ -21,7 +21,7 @@ def test_loja_import_and_cleanup():
             import loja
             # Verificar se a limpeza foi registrada
             mock_atexit_register.assert_called_once()
-            assert True
+            
         except Exception as e:
             pytest.fail(f"Falha na importação: {e}")
 
@@ -32,7 +32,8 @@ def test_loja_main_execution_simple():
     """
     try:
         import loja
-        assert True
+        # Apenas a importação bem-sucedida já é suficiente
+        # Não precisa de assert True
     except Exception as e:
         pytest.fail(f"Falha na importação do loja.py: {e}")
 

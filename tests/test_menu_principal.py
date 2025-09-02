@@ -7,7 +7,7 @@ def test_exibir_menu_principal_opcoes_validas(mocker):
     Testa as opções válidas do menu principal
     """
     # Mock completo das funções
-    mock_input = mocker.patch('builtins.input', side_effect=['1', '5'])
+    mocker.patch('builtins.input', side_effect=['1', '5'])
     mocker.patch('src.interface.interface.mostrar_menu')
     mocker.patch('src.interface.interface.limpar_tela')
     mocker.patch('src.interface.interface.mensagem_sucesso')
@@ -28,7 +28,7 @@ def test_exibir_menu_principal_opcao_invalida(mocker):
     """
     Testa comportamento com opção inválida no menu principal
     """
-    mock_input = mocker.patch('builtins.input', side_effect=['99', '5'])
+    mocker.patch('builtins.input', side_effect=['99', '5'])
     mock_mensagem_alerta = mocker.patch('src.interface.interface.mensagem_alerta')
     mocker.patch('src.interface.interface.pausar')
     
@@ -43,7 +43,7 @@ def test_menu_cadastros_opcoes_validas(mocker):
     """
     Testa as opções válidas do menu de cadastros
     """
-    mock_input = mocker.patch('builtins.input', side_effect=['1', '4'])
+    mocker.patch('builtins.input', side_effect=['1', '4'])
     mock_cadastrar = mocker.patch('src.models.cadastros.cadastrar_item')
     mocker.patch('src.interface.interface.pausar')
     
@@ -58,7 +58,7 @@ def test_menu_cadastros_opcao_invalida(mocker):
     """
     Testa comportamento com opção inválida no menu de cadastros
     """
-    mock_input = mocker.patch('builtins.input', side_effect=['99', '4'])
+    mocker.patch('builtins.input', side_effect=['99', '4'])
     mock_mensagem_alerta = mocker.patch('src.interface.interface.mensagem_alerta')
     mocker.patch('src.interface.interface.pausar')
     
@@ -73,8 +73,8 @@ def test_menu_principal_sair(mocker):
     """
     Testa a opção de sair do menu principal
     """
-    mock_input = mocker.patch('builtins.input', return_value='5')
-    mock_limpar_tela = mocker.patch('src.interface.interface.limpar_tela')
+    mocker.patch('builtins.input', return_value='5')
+    mocker.patch('src.interface.interface.limpar_tela')
     mock_mensagem_sucesso = mocker.patch('src.interface.interface.mensagem_sucesso')
     
     from menu_principal import exibir_menu_principal
