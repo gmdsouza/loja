@@ -96,9 +96,9 @@ def test_ler_arquivo(mocker):
     """Testa a função genérica de leitura de arquivo"""
     conteudo = "conteúdo do arquivo"
     
-    with patch("builtins.open", mock_open(read_data=conteudo)) as mock_file:
+    with patch("builtins.open", mock_open(read_data=conteudo)):
         with open("arquivo.txt") as f:
-         resultado = f.read()
+            f.read()  # Lê o conteúdo, mas não precisa armazenar em variável
 
 @pytest.mark.unitario_arquivos
 def test_ler_arquivo_modo_diferente(mocker):

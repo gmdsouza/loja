@@ -156,9 +156,9 @@ def test_salvar_db_estrutura_automatica(mocker):
     with patch('builtins.open', mock_open()):
         try:
             auth_manipulacao.salvar_db(dados_incompletos)
-            assert True  # Funcionou sem erro
+            # Se chegou aqui, a função executou sem erro
         except Exception:
-            assert False, "A função lançou uma exceção"
+            pytest.fail("A função lançou uma exceção")
 
 @pytest.mark.unitario_auth_manipulacao
 def test_salvar_db_excecao_geral(mocker):
