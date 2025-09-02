@@ -73,3 +73,5 @@ Traceback (most recent call last):
     ^^^^^^^
 NameError: name 'pedidos' is not defined
 2025-09-01 18:27:35,995 [INFO] auth: Falha de login para '': Usuário não encontrado.
+2025-09-01 21:04:33,010 [INFO] auth: Aplicação iniciada
+2025-09-01 21:04:36,593 [INFO] auth: Login bem-sucedido para 'teste'

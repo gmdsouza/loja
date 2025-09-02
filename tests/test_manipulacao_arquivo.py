@@ -11,19 +11,19 @@ def test_gravar_produto_fakestore(mocker):
     mock_file = mock_open()
     
     with patch('builtins.open', mock_file):
-        manipulacaoArquivos.gravarProdutoFakeStore(123, "Produto Teste", 25.99, "Descrição teste")
+        manipulacaoArquivos.gravarProdutoFakeStore(123, "Produto Teste", 2599, "Descrição teste")
         
         # Verifica se o arquivo foi aberto no modo append
         mock_file.assert_called_once_with("produtos_local.txt", "a")
         
         # Verifica se a linha foi escrita corretamente
         handle = mock_file()
-        handle.write.assert_called_once_with("123;Produto Teste;25.99;Descrição teste\n")
+        handle.write.assert_called_once_with("123;Produto Teste;2599;Descrição teste\n")
 
 @pytest.mark.unitario_arquivos
 def test_ler_produtos_locais_existente(mocker):
     """Testa a leitura de produtos quando o arquivo existe"""
-    conteudo_fake = "1;Produto A;10.5;Descrição A\n2;Produto B;20.0;Descrição B\n"
+    conteudo_fake = "1;Produto A;1050;Descrição A\n2;Produto B;2000;Descrição B\n"
     
     with patch('builtins.open', mock_open(read_data=conteudo_fake)):
         resultado = manipulacaoArquivos.lerProdutosLocais()
@@ -31,12 +31,12 @@ def test_ler_produtos_locais_existente(mocker):
         assert len(resultado) == 2
         assert resultado[0]["id"] == 1
         assert resultado[0]["title"] == "Produto A"
-        assert resultado[0]["price"] == 10.5
+        assert resultado[0]["price"] == 1050  # Agora como inteiro (R$ 10,50)
         assert resultado[0]["description"] == "Descrição A"
         
         assert resultado[1]["id"] == 2
         assert resultado[1]["title"] == "Produto B"
-        assert resultado[1]["price"] == 20.0
+        assert resultado[1]["price"] == 2000  # Agora como inteiro (R$ 20,00)
         assert resultado[1]["description"] == "Descrição B"
 
 @pytest.mark.unitario_arquivos
@@ -49,7 +49,7 @@ def test_ler_produtos_locais_arquivo_inexistente(mocker):
 @pytest.mark.unitario_arquivos
 def test_ler_produtos_locais_linha_invalida(mocker):
     """Testa a leitura com linha mal formatada"""
-    conteudo_fake = "1;Produto A;10.5;Descrição A\nlinha_invalida\n2;Produto B;20.0;Descrição B\n"
+    conteudo_fake = "1;Produto A;1050;Descrição A\nlinha_invalida\n2;Produto B;2000;Descrição B\n"
     
     with patch('builtins.open', mock_open(read_data=conteudo_fake)):
         resultado = manipulacaoArquivos.lerProdutosLocais()
@@ -57,15 +57,17 @@ def test_ler_produtos_locais_linha_invalida(mocker):
         # Deve ignorar a linha inválida e processar as outras
         assert len(resultado) == 2
         assert resultado[0]["id"] == 1
+        assert resultado[0]["price"] == 1050
         assert resultado[1]["id"] == 2
+        assert resultado[1]["price"] == 2000
 
 @pytest.mark.unitario_arquivos
 def test_gravar_pedidos(mocker):
     """Testa a gravação de pedidos"""
     mock_file = mock_open()
     lista_pedido = [
-        (1, "Produto A", 10.0),
-        (2, "Produto B", 20.5)
+        (1, "Produto A", 1000),  # Preço como inteiro (R$ 10,00)
+        (2, "Produto B", 2050)   # Preço como inteiro (R$ 20,50)
     ]
     datahora = datetime(2024, 1, 15, 10, 30, 0)
     
@@ -77,8 +79,8 @@ def test_gravar_pedidos(mocker):
         
         # Verifica se a linha foi escrita corretamente
         handle = mock_file()
-        expected_json = json.dumps([{"id": 1, "nome": "Produto A", "preco": 10.0}, 
-                                  {"id": 2, "nome": "Produto B", "preco": 20.5}])
+        expected_json = json.dumps([{"id": 1, "nome": "Produto A", "preco": 1000}, 
+                                  {"id": 2, "nome": "Produto B", "preco": 2050}])
         expected_line = f"2024-01-15 10:30:00;{expected_json}\n"
         handle.write.assert_called_once_with(expected_line)
 
@@ -138,3 +140,18 @@ def test_apagar_arquivos_temporarios_misto(mocker):
     
     # Verifica que os.remove foi chamado apenas para o arquivo que existe
     mock_remove.assert_called_once_with("produtos_local.txt")
+
+@pytest.mark.unitario_arquivos
+def test_conversao_preco_para_real(mocker):
+    """Testa auxiliar para converter preço em centavos para formato real"""
+    # Função auxiliar para converter 1050 para "10.50"
+    def formatar_preco(preco_centavos):
+        reais = preco_centavos // 100
+        centavos = preco_centavos % 100
+        return f"{reais}.{centavos:02d}"
+    
+    assert formatar_preco(1050) == "10.50"
+    assert formatar_preco(2000) == "20.00"
+    assert formatar_preco(2599) == "25.99"
+    assert formatar_preco(100) == "1.00"
+    assert formatar_preco(5) == "0.05"
