@@ -52,14 +52,128 @@ jobs:
           pip install pytest
         fi
 
-    - name: Run all unit tests
+    - name: Run unitarios_login tests
+      run: |
+        python -m pytest -m "unitarios_login" -v || echo "No unitarios_login tests found"
+
+    - name: Run unitarios_cadastro tests
+      run: |
+        python -m pytest -m "unitarios_cadastro" -v || echo "No unitarios_cadastro tests found"
+
+    - name: Run unitarios_exclusao tests
+      run: |
+        python -m pytest -m "unitarios_exclusao" -v || echo "No unitarios_exclusao tests found"
+
+    - name: Run unitarios_editar tests
+      run: |
+        python -m pytest -m "unitarios_editar" -v || echo "No unitarios_editar tests found"
+
+    - name: Run unitario_pagamento tests
+      run: |
+        python -m pytest -m "unitario_pagamento" -v || echo "No unitario_pagamento tests found"
+
+    - name: Run unitario_pedidos_adicionar tests
+      run: |
+        python -m pytest -m "unitario_pedidos_adicionar" -v || echo "No unitario_pedidos_adicionar tests found"
+
+    - name: Run unitario_pedidos_fechar tests
+      run: |
+        python -m pytest -m "unitario_pedidos_fechar" -v || echo "No unitario_pedidos_fechar tests found"
+
+    - name: Run unitario_pedidos_remover_item tests
+      run: |
+        python -m pytest -m "unitario_pedidos_remover_item" -v || echo "No unitario_pedidos_remover_item tests found"
+
+    - name: Run unitario_pedidos_listar tests
+      run: |
+        python -m pytest -m "unitario_pedidos_listar" -v || echo "No unitario_pedidos_listar tests found"
+
+    - name: Run unitario_catalogo tests
+      run: |
+        python -m pytest -m "unitario_catalogo" -v || echo "No unitario_catalogo tests found"
+
+    - name: Run unitario_usuarios tests
+      run: |
+        python -m pytest -m "unitario_usuarios" -v || echo "No unitario_usuarios tests found"
+
+    - name: Run unitario_auth_manipulacao tests
+      run: |
+        python -m pytest -m "unitario_auth_manipulacao" -v || echo "No unitario_auth_manipulacao tests found"
+
+    - name: Run unitario_auth_loja tests
+      run: |
+        python -m pytest -m "unitario_auth_loja" -v || echo "No unitario_auth_loja tests found"
+
+    - name: Run unitario_arquivos tests
+      run: |
+        python -m pytest -m "unitario_arquivos" -v || echo "No unitario_arquivos tests found"
+
+    - name: Run unitario_menu tests
+      run: |
+        python -m pytest -m "unitario_menu" -v || echo "No unitario_menu tests found"
+
+    - name: Run unitario_loja tests
+      run: |
+        python -m pytest -m "unitario_loja" -v || echo "No unitario_loja tests found"
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          pip install pytest
+        fi
+
+    - name: Run integration tests
+      run: |
+        python -m pytest -m "integracao" -v || echo "No integration tests found"
+
+  all-tests:
+    name: Run All Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          pip install pytest
+        fi
+
+    - name: Run all tests
       run: |
         python -m pytest -v
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: [unit-tests]
+    needs: [unit-tests, integration-tests, all-tests]
     if: success() && github.ref == 'refs/heads/main'
 
     steps:
