@@ -168,6 +168,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests, all-tests]
     if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    
+    # Adicione esta condição para pular se não tiver secrets configurados
+    continue-on-error: ${{ !secrets.SONAR_TOKEN || !secrets.SONAR_HOST_URL }}
 
     steps:
     - name: Checkout code
@@ -187,6 +190,16 @@ jobs:
           pip install -r requirements.txt
         else
           pip install rich requests
+        fi
+
+    - name: Check if SonarQube secrets are configured
+      run: |
+        if [ -z "${{ secrets.SONAR_TOKEN }}" ] || [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
+          echo "⚠ SonarQube secrets not configured. Skipping analysis."
+          echo "ℹ To enable SonarQube analysis, configure SONAR_TOKEN and SONAR_HOST_URL secrets in GitHub"
+          exit 0
+        else
+          echo "✓ SonarQube secrets configured. Proceeding with analysis."
         fi
 
     - name: SonarQube Scan
